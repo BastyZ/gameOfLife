@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
+#include <ctime>
 
 using namespace std;
 typedef unsigned char ubyte;
@@ -39,32 +40,41 @@ void computeIterationSerial() {
 }
 
 int main(){
-    m_worldWidth=20;
-    m_worldHeight=20;
+    m_worldWidth=6610;
+    m_worldHeight=6610;
     m_dataLength=m_worldWidth*m_worldHeight;
     m_data=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
     m_resultData=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
+
     for(int i=0;i<m_dataLength;i++){
         m_data[i] = (ubyte) rand() % 2;
     }
-    for(int i=0;i<10;i++){
-        for(int j=0;j<10;j++){
-            printf("%u ",  m_data[j+i*10]);
+
+    int m = 1;
+    while (m--) {
+
+        int n = 1;
+        clock_t start = clock();
+
+        while (n--) {
+            //clock_t check = clock();
+            //if ((double(check - watch) / CLOCKS_PER_SEC) >= 10) {
+            //    cout << n << " in 10 secs" << endl;
+            //    break;
+            //}
+            computeIterationSerial();
+            /*    cout << "----- " << n << " ------" << endl;
+                for(int i=0;i<m_worldHeight;i++){
+                    for(int j=0;j<m_worldWidth;j++){
+                        //printf("%u ",  m_resultData[j+i*m_worldWidth]);
+                        if (m_resultData[j+i*m_worldWidth] == 0) cout << "  ";
+                        if (m_resultData[j+i*m_worldWidth] == 1) cout << "o ";
+                    }
+                    cout << " |" << endl << "| ";
+                }
+                usleep(400000); */
         }
-        cout << endl;
-    }
-    int n = 400;
-    while (n--) {
-        computeIterationSerial();
-        cout << "----- " << n << " ------" << endl;
-        for(int i=0;i<m_worldHeight;i++){
-            for(int j=0;j<m_worldWidth;j++){
-                //printf("%u ",  m_resultData[j+i*m_worldWidth]);
-                if (m_resultData[j+i*m_worldWidth] == 0) cout << "  ";
-                if (m_resultData[j+i*m_worldWidth] == 1) cout << "o ";
-            }
-            cout << " |" << endl << "| ";
-        }
-        usleep(400000);
+        clock_t finish = clock();
+        std::cout << (double(finish - start) / CLOCKS_PER_SEC) << std::endl ;
     }
 }

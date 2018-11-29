@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 #define N 1024
@@ -8,29 +9,22 @@ using namespace std;
 
 typedef unsigned char ubyte;
 
-ubyte* m_data;
-ubyte* m_resultData;
+ubyte* m_data, *m_resultData;
+ubyte* d_m_data, *d_m_resultData;
 
-size_t m_worldWidth;
-size_t m_worldHeight;
-size_t m_dataLength;  // m_worldWidth * m_worldHeight
+cudaError_t err1;
+cudaError_t err2;
+int EXIT_ERROR = 2;
 
-// Maybe useful data
-
-int screenWidth = 1024;
-int screenHeight = 768;
-
-ushort threadsCount = 256;
+ushort threadsCount = 1024;
 
 // game of life settings
-size_t lifeIteratinos = 1;
 uint bitLifeBytesPerTrhead = 1u;
 
-size_t worldWidth = 256;
-size_t worldHeight = 256;
-
-size_t newWorldWidth = 256;
-size_t newWorldHeight = 256;
+size_t m_worldWidth = 20000;
+size_t m_worldHeight = 20000;
+size_t m_dataLength;  // m_worldWidth * m_worldHeight
+size_t lifeIteratinos = 1000;
 
 // ---
 
@@ -71,30 +65,34 @@ void runSimpleLifeKernel(ubyte *&d_lifeData, ubyte *&d_lifeDataBuffer, size_t wo
 }
 
 int main(){
-    m_worldWidth=20;
-    m_worldHeight=20;
     m_dataLength=m_worldWidth*m_worldHeight;
-    m_data=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
-    m_resultData=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
+    int size = m_dataLength*sizeof(ubyte);
+
+    m_data=(ubyte*) malloc(size);
+    m_resultData=(ubyte*) malloc(size);
+
+    err1 = cudaMalloc((void**)&d_m_data, size);
+    err2 =cudaMalloc((void**)&d_m_resultData, size);
+
+    if( err1 != cudaSuccess ) {
+        printf("CUDA error: %s\n", cudaGetErrorString(err1));
+        return EXIT_ERROR;
+    }
+
+    if( err2 != cudaSuccess ) {
+        printf("CUDA error: %s\n", cudaGetErrorString(err2));
+        return EXIT_ERROR;
+    }
+
     for(int i=0;i<m_dataLength;i++){
         m_data[i] = (ubyte) rand() % 2;
     }
-    for(int i=0;i<10;i++){
-        for(int j=0;j<10;j++){
-            printf("%u ",  m_data[j+i*10]);
-        }
-        cout << endl;
-    }
-    int n = 1000;
-    while (n--) {
-        computeIterationSerial();
-        cout << "-----" << n << "------" << endl;
-        for(int i=0;i<m_worldHeight;i++){
-            for(int j=0;j<m_worldWidth;j++){
-                printf("%u ",  m_data[j+i*10]);
-            }
-            cout << endl;
-        }
-        usleep(500000);
-    }
+
+    cudaMemcpy(d_m_data, m_data, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_m_resultData, m_resultData, size, cudaMemcpyHostToDevice);
+
+    clock_t start = clock();
+    runSimpleLifeKernel(d_m_data, d_m_resultData, m_worldWidth, m_worldHeight, lifeIteratinos, threadsCount);
+    clock_t finish = clock();
+    std::cout << (double(finish - start) / CLOCKS_PER_SEC) << std::endl ;
 }

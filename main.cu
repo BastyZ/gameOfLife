@@ -70,6 +70,31 @@ void runSimpleLifeKernel(ubyte *&d_lifeData, ubyte *&d_lifeDataBuffer, size_t wo
     }
 }
 
-int main() {
-    return 0;
+int main(){
+    m_worldWidth=20;
+    m_worldHeight=20;
+    m_dataLength=m_worldWidth*m_worldHeight;
+    m_data=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
+    m_resultData=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
+    for(int i=0;i<m_dataLength;i++){
+        m_data[i] = (ubyte) rand() % 2;
+    }
+    for(int i=0;i<10;i++){
+        for(int j=0;j<10;j++){
+            printf("%u ",  m_data[j+i*10]);
+        }
+        cout << endl;
+    }
+    int n = 1000;
+    while (n--) {
+        computeIterationSerial();
+        cout << "-----" << n << "------" << endl;
+        for(int i=0;i<m_worldHeight;i++){
+            for(int j=0;j<m_worldWidth;j++){
+                printf("%u ",  m_data[j+i*10]);
+            }
+            cout << endl;
+        }
+        usleep(500000);
+    }
 }

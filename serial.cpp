@@ -1,6 +1,8 @@
 #include "serial.h"
 #include <cstdlib>
 #include <iostream>
+#include <unistd.h>
+
 using namespace std;
 typedef unsigned char ubyte;
 
@@ -37,8 +39,8 @@ void computeIterationSerial() {
 }
 
 int main(){
-    m_worldWidth=10;
-    m_worldHeight=10;
+    m_worldWidth=20;
+    m_worldHeight=20;
     m_dataLength=m_worldWidth*m_worldHeight;
     m_data=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
     m_resultData=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
@@ -51,12 +53,18 @@ int main(){
         }
         cout << endl;
     }
-    computeIterationSerial();
-    cout << "-----------" << endl;
-    for(int i=0;i<10;i++){
-        for(int j=0;j<10;j++){
-            printf("%u ",  m_data[j+i*10]);
+    int n = 400;
+    while (n--) {
+        computeIterationSerial();
+        cout << "----- " << n << " ------" << endl;
+        for(int i=0;i<m_worldHeight;i++){
+            for(int j=0;j<m_worldWidth;j++){
+                //printf("%u ",  m_resultData[j+i*m_worldWidth]);
+                if (m_resultData[j+i*m_worldWidth] == 0) cout << "  ";
+                if (m_resultData[j+i*m_worldWidth] == 1) cout << "o ";
+            }
+            cout << " |" << endl << "| ";
         }
-        cout << endl;
+        usleep(400000);
     }
 }

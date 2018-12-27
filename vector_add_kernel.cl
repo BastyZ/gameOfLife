@@ -1,5 +1,5 @@
-__kernel void vector_add(̣__global char *lifeData,__global size_t worldWidth,
-                                 __global size_t worldHeight, __global char *resultLifeData) {
+__kernel void vector_add(__global char *lifeData,size_t worldWidth,
+                                 size_t worldHeight, __global char *resultLifeData) {
     uint worldSize = worldWidth * worldHeight;
     // Get the index of the current element
     int i = get_global_id(0);

@@ -14,22 +14,24 @@ int main(void) {
     size_t* m_worldWidth = (size_t*) malloc(sizeof(size_t));
     size_t* m_worldHeight = (size_t*) malloc(sizeof(size_t));
 
-    m_worldWidth[0]=10;
-    m_worldHeight[0]=10;
+    m_worldWidth[0]=16;
+    m_worldHeight[0]=16;
 
     size_t m_dataLength = m_worldWidth[0] * m_worldHeight[0];
     size_t lifeIteratinos = 1000;
     const int LIST_SIZE = m_dataLength;
     char *A = (char*)malloc(sizeof(char)*LIST_SIZE);
+    char *B = (char*)malloc(sizeof(char)*LIST_SIZE);
     for(int i=0;i<LIST_SIZE;i++){
-      A[i] = rand() % 2;
+        A[i] = rand() % 2;
+        B[i] = 42;
     }
     // Load the kernel source code into the array source_str
     FILE *fp;
     char *source_str;
     size_t source_size;
 
-    fp = fopen("vector_add_kernel.cl", "r");
+    fp = fopen("lifeKernel.cl", "r");
     if (!fp) {
         fprintf(stderr, "Failed to load kernel.\n");
         exit(1);
@@ -45,7 +47,7 @@ int main(void) {
     cl_uint ret_num_platforms;
     cl_int ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
     ret = clGetDeviceIDs( platform_id, CL_DEVICE_TYPE_ALL, 1,
-            &device_id, &ret_num_devices);
+                          &device_id, &ret_num_devices);
 
     // Create an OpenCL context
     cl_context context = clCreateContext( NULL, 1, &device_id, NULL, NULL, &ret);
@@ -55,30 +57,32 @@ int main(void) {
 
     // Create memory buffers on the device for each vector
     cl_mem a_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            LIST_SIZE * sizeof(char), NULL, &ret);
+                                      LIST_SIZE * sizeof(char), NULL, &ret);
     cl_mem b_mem_obj = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-            LIST_SIZE * sizeof(char), NULL, &ret);
+                                      LIST_SIZE * sizeof(char), NULL, &ret);
     cl_mem c_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            sizeof(size_t), NULL, &ret);
+                                      sizeof(size_t), NULL, &ret);
     cl_mem d_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            sizeof(size_t), NULL, &ret);
+                                      sizeof(size_t), NULL, &ret);
 
     // Copy the lists A and B to their respective memory buffers
     ret = clEnqueueWriteBuffer(command_queue, a_mem_obj, CL_TRUE, 0,
-            LIST_SIZE * sizeof(char), A, 0, NULL, NULL);
+                               LIST_SIZE * sizeof(char), A, 0, NULL, NULL);
+    ret = clEnqueueWriteBuffer(command_queue, b_mem_obj, CL_TRUE, 0,
+                               LIST_SIZE * sizeof(char), B, 0, NULL, NULL);
     ret = clEnqueueWriteBuffer(command_queue, c_mem_obj, CL_TRUE, 0,
-            sizeof(size_t), m_worldWidth, 0, NULL, NULL);
+                               sizeof(size_t), m_worldWidth, 0, NULL, NULL);
     ret = clEnqueueWriteBuffer(command_queue, d_mem_obj, CL_TRUE, 0,
-            sizeof(size_t), m_worldHeight, 0, NULL, NULL);
+                               sizeof(size_t), m_worldHeight, 0, NULL, NULL);
     // Create a program from the kernel source
     cl_program program = clCreateProgramWithSource(context, 1,
-            (const char **)&source_str, (const size_t *)&source_size, &ret);
+                                                   (const char **)&source_str, (const size_t *)&source_size, &ret);
 
     // Build the program
     ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
 
     // Create the OpenCL kernel
-    cl_kernel kernel = clCreateKernel(program, "vector_add", &ret);
+    cl_kernel kernel = clCreateKernel(program, "lifeKernel", &ret);
 
     // Set the arguments of the kernel
     ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&a_mem_obj);
@@ -90,40 +94,38 @@ int main(void) {
     size_t global_item_size = LIST_SIZE; // Process the entire lists
     size_t local_item_size = 64; // Process in groups of 64
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL,
-            &global_item_size, &local_item_size, 0, NULL, NULL);
+                                 &global_item_size, &local_item_size, 0, NULL, NULL);
     char result[4096];
     size_t size;
     clGetProgramBuildInfo( program, device_id, CL_PROGRAM_BUILD_LOG, sizeof(result), result, &size);
     printf("%s\n", result);
-    
 
     // Read the memory buffer C on the device to the local variable C
-    char *B = (char*)malloc(sizeof(char)*LIST_SIZE);
     ret = clEnqueueReadBuffer(command_queue, b_mem_obj, CL_TRUE, 0,
-            LIST_SIZE * sizeof(char), B, 0, NULL, NULL);
+                              LIST_SIZE * sizeof(char), B, 0, NULL, NULL);
     // Display the result to the screen
     //for(i = 0; i < LIST_SIZE; i++)
     //    printf("%d\n",A[i]);
     //for(i = 0; i < LIST_SIZE; i++)
     //    printf("%d\n",A[i]);
     for(int i=0;i<m_worldHeight[0];i++){
-      for(int j=0;j<m_worldWidth[0];j++){
-          //printf("%u ",  m_resultData[j+i*m_worldWidth]);
-          printf("%d ", A[j+i*m_worldWidth[0]]);
-          //if (B[j+i*m_worldWidth] == 0) printf(" ");
-          //if (B[j+i*m_worldWidth] == 1) printf("1");
-      }
-      printf("\n");
+        for(int j=0;j<m_worldWidth[0];j++){
+            //printf("%u ",  m_resultData[j+i*m_worldWidth]);
+            printf("%d ", A[j+i*m_worldWidth[0]]);
+            //if (B[j+i*m_worldWidth] == 0) printf(" ");
+            //if (B[j+i*m_worldWidth] == 1) printf("1");
+        }
+        printf("\n");
     }
     printf("-------------\n");
     for(int i=0;i<m_worldHeight[0];i++){
-      for(int j=0;j<m_worldWidth[0];j++){
-          //printf("%u ",  m_resultData[j+i*m_worldWidth]);
-          printf("%d ", B[j+i*m_worldWidth[0]]);
-          //if (B[j+i*m_worldWidth] == 0) printf(" ");
-          //if (B[j+i*m_worldWidth] == 1) printf("1");
-      }
-      printf("\n");
+        for(int j=0;j<m_worldWidth[0];j++){
+            //printf("%u ",  m_resultData[j+i*m_worldWidth]);
+            printf("%d ", B[j+i*m_worldWidth[0]]);
+            //if (B[j+i*m_worldWidth] == 0) printf(" ");
+            //if (B[j+i*m_worldWidth] == 1) printf("1");
+        }
+        printf("\n");
     }
     // Clean up
     ret = clFlush(command_queue);

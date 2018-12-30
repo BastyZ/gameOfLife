@@ -3,7 +3,7 @@ __kernel void lifeKernel(__global char *lifeData,__global size_t* worldWidth,
     int worldSize = worldWidth[0]* worldHeight[0];
     // Get the index of the current element
 
-    for (int cellId = get_local_id(0);
+    for (int cellId = get_global_id(0);
         cellId < worldSize;
         cellId += get_local_size(0)) {
 

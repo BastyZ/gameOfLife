@@ -123,6 +123,7 @@ int main(void) {
         fprintf(f,"%d;%d;%f\n",i*8,(i*8)*(i*8),time_taken);
         fflush(f);
         printf("|");
+        fflush(stdout);
     }
     printf("\n");
 

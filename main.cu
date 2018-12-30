@@ -5,7 +5,7 @@
 using namespace std;
 #define N 1024
 #define RADIUS 3
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 47
 
 typedef unsigned char ubyte;
 

@@ -101,4 +101,5 @@ int main(void) {
     printf("\n");
 
     fclose(f);
+    return 0;
 }

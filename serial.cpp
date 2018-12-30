@@ -73,6 +73,7 @@ int run(int lado, int iteraciones, int work_size) {
     }
     free(m_resultData);
     free(m_data);
+    return 0;
 }
 
 

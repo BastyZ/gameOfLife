@@ -188,7 +188,7 @@ int main(void) {
     for(int i = 1; i<128; i++){
         clock_t t;
         t = clock();
-        run(8*i,iter, 1024*1024*64);
+        run(8*i,iter, 47);
         t= clock()-t;
         double time_taken = ((double)t)/CLOCKS_PER_SEC;
         fprintf(f,"%d;%d;%f\n",i*8,(i*8)*(i*8),time_taken);

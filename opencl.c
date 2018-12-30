@@ -112,7 +112,7 @@ int run(int a, int i, int c) {
                                   LIST_SIZE * sizeof(char), B, 0, NULL, NULL);
 
         // Swap pointers
-        void *aux = A;
+        char *aux = A;
         A = B;
         B = aux;
 
@@ -175,7 +175,7 @@ int run(int a, int i, int c) {
 
 int main(void) {
 
-    FILE *f = fopen("opencl_results.csv","w+b");
+    FILE *f = fopen("aaaopencl_results.csv","w+b");
 
     int contador = 5;
     int size = 32;

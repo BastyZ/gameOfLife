@@ -17,7 +17,7 @@ __kernel void lifeKernel(__global char *lifeData,__global size_t* worldWidth,
         int aliveCells = lifeData[xLeft + yAbsUp] + lifeData[x + yAbsUp]
                           + lifeData[xRight + yAbsUp] + lifeData[xLeft + yAbs] + lifeData[xRight + yAbs]
                           + lifeData[xLeft + yAbsDown] + lifeData[x + yAbsDown] + lifeData[xRight + yAbsDown];
-                          resultLifeData[x + yAbs] =
-                                  aliveCells == 3 || (aliveCells == 2 && lifeData[x + yAbs]) ? 1 : 0;
+      resultLifeData[x + yAbs] =
+              aliveCells == 3 || (aliveCells == 2 && lifeData[x + yAbs]) ? 1 : 0;
     }
 }

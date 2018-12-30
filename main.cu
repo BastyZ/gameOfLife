@@ -5,7 +5,7 @@
 using namespace std;
 #define N 1024
 #define RADIUS 3
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 64
 
 typedef unsigned char ubyte;
 
@@ -21,10 +21,9 @@ ushort threadsCount = 1024;
 // game of life settings
 uint bitLifeBytesPerTrhead = 1u;
 
-size_t m_worldWidth = 20000;
-size_t m_worldHeight = 20000;
+size_t m_worldWidth;
+size_t m_worldHeight;
 size_t m_dataLength;  // m_worldWidth * m_worldHeight
-size_t lifeIteratinos = 1000;
 
 // ---
 
@@ -64,7 +63,13 @@ void runSimpleLifeKernel(ubyte *&d_lifeData, ubyte *&d_lifeDataBuffer, size_t wo
     }
 }
 
-int main(){
+int run(int lado, int iteraciones, int work_size) {
+    // settings
+    size_t m_worldWidth = lado;
+    size_t m_worldHeight = lado;
+    size_t lifeIteratinos = iteraciones;
+
+
     m_dataLength=m_worldWidth*m_worldHeight;
     int size = m_dataLength*sizeof(ubyte);
 
@@ -91,8 +96,35 @@ int main(){
     cudaMemcpy(d_m_data, m_data, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_m_resultData, m_resultData, size, cudaMemcpyHostToDevice);
 
-    clock_t start = clock();
     runSimpleLifeKernel(d_m_data, d_m_resultData, m_worldWidth, m_worldHeight, lifeIteratinos, threadsCount);
-    clock_t finish = clock();
-    std::cout << (double(finish - start) / CLOCKS_PER_SEC) << std::endl ;
+    free(m_resultData);
+    free(m_data);
+    return 0;
+}
+
+
+int main(void) {
+    FILE *f = fopen("CUDA_results.csv","w+b");
+
+    int contador = 5;
+    int size = 32;
+    int iter = 100;
+    while(contador--) {
+        run(size, iter, 32);
+    }
+    fprintf(f,"lado;celdas;tiempo\n");
+    printf("Running Test 1: \n");
+    for(int i = 1; i<128; i++){
+        clock_t t;
+        t = clock();
+        run(8*i,iter, 64);
+        t= clock()-t;
+        double time_taken = ((double)t)/CLOCKS_PER_SEC;
+        fprintf(f,"%d;%d;%f\n",i*8,(i*8)*(i*8),time_taken);
+        fflush(f);
+        printf("|");
+    }
+    printf("\n");
+
+    fclose(f);
 }

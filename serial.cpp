@@ -39,9 +39,10 @@ void computeIterationSerial() {
     std::swap(m_data, m_resultData);
 }
 
-int main(){
-    m_worldWidth=6610;
-    m_worldHeight=6610;
+int run(int lado, int iteraciones, int work_size) {
+    // settings
+    m_worldWidth=lado;
+    m_worldHeight=lado;
     m_dataLength=m_worldWidth*m_worldHeight;
     m_data=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
     m_resultData=(ubyte*) malloc(m_dataLength*sizeof(ubyte));
@@ -50,31 +51,53 @@ int main(){
         m_data[i] = (ubyte) rand() % 2;
     }
 
-    int m = 1;
-    while (m--) {
+    int n = iteraciones;
 
-        int n = 1;
-        clock_t start = clock();
-
-        while (n--) {
-            //clock_t check = clock();
-            //if ((double(check - watch) / CLOCKS_PER_SEC) >= 10) {
-            //    cout << n << " in 10 secs" << endl;
-            //    break;
-            //}
-            computeIterationSerial();
-            /*    cout << "----- " << n << " ------" << endl;
-                for(int i=0;i<m_worldHeight;i++){
-                    for(int j=0;j<m_worldWidth;j++){
-                        //printf("%u ",  m_resultData[j+i*m_worldWidth]);
-                        if (m_resultData[j+i*m_worldWidth] == 0) cout << "  ";
-                        if (m_resultData[j+i*m_worldWidth] == 1) cout << "o ";
-                    }
-                    cout << " |" << endl << "| ";
+    while (n--) {
+        //clock_t check = clock();
+        //if ((double(check - watch) / CLOCKS_PER_SEC) >= 10) {
+        //    cout << n << " in 10 secs" << endl;
+        //    break;
+        //}
+        computeIterationSerial();
+        /*    cout << "----- " << n << " ------" << endl;
+            for(int i=0;i<m_worldHeight;i++){
+                for(int j=0;j<m_worldWidth;j++){
+                    //printf("%u ",  m_resultData[j+i*m_worldWidth]);
+                    if (m_resultData[j+i*m_worldWidth] == 0) cout << "  ";
+                    if (m_resultData[j+i*m_worldWidth] == 1) cout << "o ";
                 }
-                usleep(400000); */
-        }
-        clock_t finish = clock();
-        std::cout << (double(finish - start) / CLOCKS_PER_SEC) << std::endl ;
+                cout << " |" << endl << "| ";
+            }
+            usleep(400000); */
     }
+    free(m_resultData);
+    free(m_data);
+}
+
+
+int main(void) {
+    FILE *f = fopen("serial_results.csv","w+b");
+
+    int contador = 5;
+    int size = 32;
+    int iter = 100;
+    while(contador--) {
+        run(size, iter, 32);
+    }
+    fprintf(f,"lado;celdas;tiempo\n");
+    printf("Running Test 1 \n");
+    for(int i = 1; i<128; i++){
+        clock_t t;
+        t = clock();
+        run(8*i,iter, 64);
+        t= clock()-t;
+        double time_taken = ((double)t)/CLOCKS_PER_SEC;
+        fprintf(f,"%d;%d;%f\n",i*8,(i*8)*(i*8),time_taken);
+        fflush(f);
+        printf("|");
+    }
+    printf("\n")
+
+    fclose(f);
 }

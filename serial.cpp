@@ -78,7 +78,7 @@ int run(int lado, int iteraciones, int work_size) {
 
 
 int main(void) {
-    FILE *f = fopen("serial_results.csv","w+b");
+    FILE *f = fopen("data/serial_results.csv","w+b");
 
     int contador = 5;
     int size = 32;

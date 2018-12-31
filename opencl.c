@@ -175,7 +175,7 @@ int run(int a, int i, int c) {
 
 int main(void) {
 
-    FILE *f = fopen("aaaopencl_results.csv","w+b");
+    FILE *f = fopen("data/opencl_results.csv","w+b");
 
     int contador = 5;
     int size = 32;

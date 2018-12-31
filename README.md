@@ -4,6 +4,31 @@ Estas implementaciones están realizadas en el marco del curso *Computación en 
 del Departamento de Ciencias de la Computación de la Univeridad de Chile, correspodiendo
 a la tarea 3 del mismo.
 
+## Correr el programa
+
+Cada uno de los programas ejecuta el juego de la vida con instruciones precargadas,
+realizando un warmup antes, y entregando resultados de las ejecuciones en archivos
+`.csv` en la carpeta `data/`, bajo el nombre `<version>_results.csv` donde `version`
+puede corresponder a CUDA, OpenCL y Serial.
+
+Para correr la version de CUDA:
+```sh
+$ nvcc main.cu
+$ ./a.out
+```
+
+para la versión de OpenCL:
+```sh
+$ make
+$ ./opencl 
+```
+
+la versión serial (CPU);
+```sh
+$ c++ -o serial serial.cpp 
+$ ./serial
+```
+
 ## Introducción
 
 El juego de la vida es un autómata celular diseñado por el matemático

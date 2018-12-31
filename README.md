@@ -29,6 +29,8 @@ $ c++ -o serial serial.cpp
 $ ./serial
 ```
 
+# Sobre el trabajo realizado
+
 ## Introducción
 
 El juego de la vida es un autómata celular diseñado por el matemático
